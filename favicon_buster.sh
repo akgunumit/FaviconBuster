@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-echo "🔍 FaviconBuster - Universal Edition"
-echo "===================================="
+echo "FaviconBuster - Universal Edition"
+echo "================================="
 echo ""
 
 # Detect operating system
 OS_TYPE=$(uname -s)
-echo "🖥️  Detected OS: $OS_TYPE"
+echo "Detected OS: $OS_TYPE"
 echo ""
 
 # Set search paths based on OS
@@ -14,7 +14,7 @@ search_paths=()
 
 case "$OS_TYPE" in
     Darwin*)
-        echo "📱 Running in macOS mode..."
+        echo "Running in macOS mode..."
         echo ""
         search_paths+=(
             "$HOME/Library/Application Support"
@@ -22,7 +22,7 @@ case "$OS_TYPE" in
         )
         ;;
     Linux*)
-        echo "🐧 Running in Linux mode..."
+        echo "Running in Linux mode..."
         echo ""
         search_paths+=(
             "$HOME/.config"
@@ -34,13 +34,13 @@ case "$OS_TYPE" in
         )
         ;;
     *)
-        echo "❌ Unsupported operating system: $OS_TYPE"
+        echo "[ERROR] Unsupported operating system: $OS_TYPE"
         echo "This script supports macOS (Darwin) and Linux only."
         exit 1
         ;;
 esac
 
-echo "🔍 Searching for browser favicon databases..."
+echo "Searching for browser favicon databases..."
 echo ""
 
 sqlite_files=()
@@ -78,11 +78,11 @@ if [ "$OS_TYPE" = "Darwin" ]; then
     done
 fi
 
-echo "📊 Found $total_found favicon database(s)"
+echo "Found $total_found favicon database(s)"
 echo ""
 
 if [ $total_found -eq 0 ]; then
-    echo "⚠️  No favicon databases found. Make sure you have supported browsers installed:"
+    echo "[WARNING] No favicon databases found. Make sure you have supported browsers installed:"
     echo "   - Chromium-based: Chrome, Brave, Edge, Vivaldi, Opera"
     echo "   - Firefox-based: Firefox, Tor Browser"
     echo "   - Safari (macOS only)"
@@ -90,39 +90,39 @@ if [ $total_found -eq 0 ]; then
 fi
 
 # Validate SQLite files
-echo "🔎 Validating SQLite3 databases..."
+echo "Validating SQLite3 databases..."
 echo ""
 
 valid_files=()
 valid_count=0
 
 for file in "${sqlite_files[@]}"; do
-    echo "📄 Checking: $file"
+    echo "Checking: $file"
 
     if file "$file" | grep -qi "sqlite"; then
         ((valid_count++))
-        echo "   ✅ Valid SQLite3 file"
+        echo "   [OK] Valid SQLite3 file"
         valid_files+=("$file")
     else
-        echo "   ❌ Not a SQLite3 file"
+        echo "   [SKIP] Not a SQLite3 file"
     fi
     echo ""
 done
 
-echo "═══════════════════════════════════════════════════════════"
-echo "📊 Validation Summary:"
+echo "============================================================="
+echo "Validation Summary:"
 echo "   Total files found: $total_found"
 echo "   Valid SQLite3 files: $valid_count"
-echo "═══════════════════════════════════════════════════════════"
+echo "============================================================="
 echo ""
 
 if [ $valid_count -eq 0 ]; then
-    echo "⚠️  No valid SQLite3 favicon databases found."
+    echo "[WARNING] No valid SQLite3 favicon databases found."
     exit 0
 fi
 
 # Check database schema and categorize by browser type
-echo "🔍 Checking database schemas and detecting browser types..."
+echo "Checking database schemas and detecting browser types..."
 echo ""
 
 chromium_files=()
@@ -130,7 +130,7 @@ firefox_files=()
 safari_files=()
 
 for file in "${valid_files[@]}"; do
-    echo "📋 Analyzing: $file"
+    echo "Analyzing: $file"
 
     # Check for Chromium schema (favicons + icon_mapping tables)
     has_chromium_favicons=$(sqlite3 "$file" "SELECT name FROM sqlite_master WHERE type='table' AND name='favicons';" 2>/dev/null)
@@ -151,10 +151,10 @@ for file in "${valid_files[@]}"; do
         has_page_url=$(sqlite3 "$file" "PRAGMA table_info(icon_mapping);" 2>/dev/null | grep -i "page_url")
 
         if [ -n "$has_url" ] && [ -n "$has_page_url" ]; then
-            echo "   ✅ Chromium database (favicons.url + icon_mapping.page_url)"
+            echo "   [OK] Chromium database (favicons.url + icon_mapping.page_url)"
             chromium_files+=("$file")
         else
-            echo "   ⚠️  Chromium schema incomplete"
+            echo "   [WARN] Chromium schema incomplete"
         fi
     elif [ -n "$has_firefox_icons" ] && [ -n "$has_firefox_pages" ]; then
         # Verify columns exist
@@ -162,10 +162,10 @@ for file in "${valid_files[@]}"; do
         has_page_url_ff=$(sqlite3 "$file" "PRAGMA table_info(moz_pages_w_icons);" 2>/dev/null | grep -i "page_url")
 
         if [ -n "$has_icon_url" ] && [ -n "$has_page_url_ff" ]; then
-            echo "   ✅ Firefox database (moz_icons.icon_url + moz_pages_w_icons.page_url)"
+            echo "   [OK] Firefox database (moz_icons.icon_url + moz_pages_w_icons.page_url)"
             firefox_files+=("$file")
         else
-            echo "   ⚠️  Firefox schema incomplete"
+            echo "   [WARN] Firefox schema incomplete"
         fi
     elif [ -n "$has_safari_icon_info" ] && [ -n "$has_safari_page_url" ] && [ -n "$has_safari_rejected" ]; then
         # Verify columns exist
@@ -175,13 +175,13 @@ for file in "${valid_files[@]}"; do
         has_rejected_icon=$(sqlite3 "$file" "PRAGMA table_info(rejected_resources);" 2>/dev/null | grep -i "icon_url")
 
         if [ -n "$has_icon_info_url" ] && [ -n "$has_page_url_safari" ] && [ -n "$has_rejected_page" ] && [ -n "$has_rejected_icon" ]; then
-            echo "   ✅ Safari database (icon_info.url + page_url.url + rejected_resources)"
+            echo "   [OK] Safari database (icon_info.url + page_url.url + rejected_resources)"
             safari_files+=("$file")
         else
-            echo "   ⚠️  Safari schema incomplete"
+            echo "   [WARN] Safari schema incomplete"
         fi
     else
-        echo "   ⚠️  Unknown or incomplete database schema"
+        echo "   [WARN] Unknown or incomplete database schema"
     fi
     echo ""
 done
@@ -189,32 +189,32 @@ done
 total_valid=$((${#chromium_files[@]} + ${#firefox_files[@]} + ${#safari_files[@]}))
 
 if [ $total_valid -eq 0 ]; then
-    echo "❌ No databases with valid schema found."
+    echo "[ERROR] No databases with valid schema found."
     exit 1
 fi
 
-echo "═══════════════════════════════════════════════════════════"
-echo "📊 Schema Check Summary:"
+echo "============================================================="
+echo "Schema Check Summary:"
 echo "   Chromium databases: ${#chromium_files[@]}"
 echo "   Firefox databases: ${#firefox_files[@]}"
 echo "   Safari databases: ${#safari_files[@]}"
 echo "   Total valid: $total_valid"
-echo "═══════════════════════════════════════════════════════════"
+echo "============================================================="
 echo ""
 
 # Extract all URLs from valid databases
-echo "🔗 Extracting URLs from databases..."
+echo "Extracting URLs from databases..."
 echo ""
 
 all_urls=()
 
 # Process Chromium databases
 if [ ${#chromium_files[@]} -gt 0 ]; then
-    echo "🔵 Processing Chromium databases..."
+    echo "[CHROMIUM] Processing Chromium databases..."
     echo ""
 
     for file in "${chromium_files[@]}"; do
-        echo "📥 Extracting from: $file"
+        echo "Extracting from: $file"
 
         # Extract URLs from favicons table (only those starting with "http")
         url_count=0
@@ -235,11 +235,11 @@ fi
 
 # Process Firefox databases
 if [ ${#firefox_files[@]} -gt 0 ]; then
-    echo "🦊 Processing Firefox databases..."
+    echo "[FIREFOX] Processing Firefox databases..."
     echo ""
 
     for file in "${firefox_files[@]}"; do
-        echo "📥 Extracting from: $file"
+        echo "Extracting from: $file"
 
         # Extract URLs from moz_icons table (only those starting with "http")
         icon_url_count=0
@@ -260,11 +260,11 @@ fi
 
 # Process Safari databases
 if [ ${#safari_files[@]} -gt 0 ]; then
-    echo "🧭 Processing Safari databases..."
+    echo "[SAFARI] Processing Safari databases..."
     echo ""
 
     for file in "${safari_files[@]}"; do
-        echo "📥 Extracting from: $file"
+        echo "Extracting from: $file"
 
         # Extract URLs from icon_info table (only those starting with "http")
         icon_info_count=0
@@ -298,12 +298,12 @@ if [ ${#safari_files[@]} -gt 0 ]; then
 fi
 
 if [ ${#all_urls[@]} -eq 0 ]; then
-    echo "⚠️  No URLs found in any database."
+    echo "[WARNING] No URLs found in any database."
     exit 0
 fi
 
 # Sort and remove duplicates using compatible method for older bash
-echo "🔄 Sorting and removing duplicates..."
+echo "Sorting and removing duplicates..."
 temp_file=$(mktemp)
 printf '%s\n' "${all_urls[@]}" | sort -u > "$temp_file"
 
@@ -314,7 +314,7 @@ while IFS= read -r line; do
 done < "$temp_file"
 rm "$temp_file"
 
-echo "✅ Processing complete!"
+echo "[OK] Processing complete!"
 echo "   Total unique URLs collected: ${#all_urls[@]}"
 echo ""
 
@@ -322,8 +322,8 @@ echo ""
 timestamp=$(date +"%Y%m%d_%H%M%S")
 output_file="buster_${timestamp}.txt"
 
-echo "💾 Saving URLs to file..."
+echo "Saving URLs to file..."
 printf '%s\n' "${all_urls[@]}" > "$output_file"
-echo "✅ Saved ${#all_urls[@]} unique URLs to: $output_file"
+echo "[OK] Saved ${#all_urls[@]} unique URLs to: $output_file"
 echo ""
-echo "🎉 Done!"
+echo "Done!"
