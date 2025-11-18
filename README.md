@@ -325,5 +325,3 @@ For issues, questions, or contributions:
 - `favicon_buster.sh` - Bash script for macOS and Linux
 - `favicon_buster.ps1` - PowerShell script for Windows
 - `README.md` - This file
-- `README_WINDOWS.md` - Detailed Windows documentation
-- `QUICKSTART_WINDOWS.md` - Windows quick start guide
