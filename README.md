@@ -34,7 +34,7 @@ The script performs the following steps:
 
 1. Download or clone the script:
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/akgunumit/FaviconBuster.git
 cd FaviconBuster
 ```
 
