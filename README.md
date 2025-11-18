@@ -18,6 +18,34 @@ This is useful for:
 - Privacy assessment
 - Digital forensics
 
+## Privacy & Security Notes
+
+**Important considerations:**
+
+### Sensitive Data in URLs
+Favicon databases store complete URLs including query parameters, which can reveal:
+- Search queries (e.g., `?q=sensitive+search`)
+- Session tokens and tracking IDs
+- User identifiers
+- Form data passed via GET requests
+- API keys in URLs
+- Personal information in query strings
+- OAuth tokens and authentication data
+
+### Data Persistence
+Favicon caches can survive:
+- Regular browser cache clearing
+- Private/Incognito mode (in some cases)
+- Cookie deletion
+- Browser restarts
+
+## Use Cases
+
+- **Security Research**: Understanding browser data persistence mechanisms
+- **Digital Forensics**: Recovering browsing history from favicon databases
+- **Privacy Auditing**: Checking what data persists after cache clearing
+- **Data Recovery**: Retrieving lost browsing history
+
 ## Supported Platforms
 
 - ✅ **macOS** (10.13+)
@@ -205,34 +233,6 @@ Safari favicon databases have a unique schema with additional tables:
 - `icon_info` table
 - `page_url` table
 - `rejected_resources` table (contains both `page_url` and `icon_url`)
-
-## Privacy & Security Notes
-
-**Important considerations:**
-
-### Sensitive Data in URLs
-Favicon databases store complete URLs including query parameters, which can reveal:
-- Search queries (e.g., `?q=sensitive+search`)
-- Session tokens and tracking IDs
-- User identifiers
-- Form data passed via GET requests
-- API keys in URLs
-- Personal information in query strings
-- OAuth tokens and authentication data
-
-### Data Persistence
-Favicon caches can survive:
-- Regular browser cache clearing
-- Private/Incognito mode (in some cases)
-- Cookie deletion
-- Browser restarts
-
-## Use Cases
-
-- **Security Research**: Understanding browser data persistence mechanisms
-- **Digital Forensics**: Recovering browsing history from favicon databases
-- **Privacy Auditing**: Checking what data persists after cache clearing
-- **Data Recovery**: Retrieving lost browsing history
 
 ## Common Issues
 
