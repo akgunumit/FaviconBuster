@@ -1,196 +1,429 @@
-# FaviconBuster
+# FaviconBuster - Universal Edition
 
-A bash script to extract and collect all URLs from browser Favicons SQLite databases on macOS.
+[![GitHub](https://img.shields.io/badge/GitHub-akgunumit%2FFaviconBuster-blue?logo=github)](https://github.com/akgunumit/FaviconBuster)
+
+A cross-platform bash script to extract and collect all URLs from browser Favicons SQLite databases on **macOS** and **Linux**.
 
 ## Overview
 
-FaviconBuster searches for browser favicon databases in your macOS Application Support directory, validates their structure, and extracts all unique URLs. This is useful for:
+FaviconBuster automatically detects your operating system and searches for browser favicon databases in the appropriate directories, validates their structure, and extracts all unique URLs.
+
+The script supports **Chromium-based browsers** (Chrome, Brave, Edge, etc.), **Firefox-based browsers** (Firefox, Tor Browser), and **Safari** (macOS only), automatically detecting the browser type and using the appropriate database schema.
+
+This is useful for:
 - Security auditing of browsing history
 - Data recovery and analysis
 - Privacy assessment
 - Browser data migration
+- Digital forensics
+
+## Supported Platforms
+
+✅ **macOS** (10.13+)  
+✅ **Linux** (Ubuntu, Debian, Fedora, Arch, and most distributions)
+
+## Supported Browsers
+
+The script automatically detects and extracts URLs from:
+
+### Chromium-based browsers:
+- Google Chrome
+- Chromium
+- Brave Browser
+- Microsoft Edge
+- Vivaldi
+- Opera
+- Any other Chromium-based browsers
+
+### Firefox-based browsers:
+- Mozilla Firefox (all profiles)
+- Tor Browser (uses Firefox schema)
+
+### Safari:
+- Safari (macOS only)
+
+The script automatically detects the browser type based on database schema and uses the appropriate extraction method.
 
 ## How It Works
 
-The script performs the following steps:
-
-1. **Search**: Finds all files named "Favicons" in `~/Library/Application Support/`
-2. **Validate**: Checks if files are valid SQLite3 databases
-3. **Schema Check**: Verifies required tables and columns exist:
-    - `favicons` table with `url` column
-    - `icon_mapping` table with `page_url` column
-4. **Extract**: Retrieves all URLs starting with "http" from both tables
-5. **Process**: Sorts and removes duplicate URLs
-6. **Export**: Saves results to `buster_TIMESTAMP.txt`
+1. **OS Detection**: Automatically detects whether you're running macOS or Linux
+2. **Recursive Search**: Searches parent directories recursively for favicon databases:
+    - Chromium: Files named "Favicons"
+    - Firefox/Tor Browser: Files named "favicons.sqlite"
+    - Safari: Files named "favicons.db" (macOS only)
+3. **Validate**: Checks if files are valid SQLite3 databases
+4. **Browser Detection**: Identifies browser type by checking database schema:
+    - **Chromium**: `favicons` and `icon_mapping` tables
+    - **Firefox/Tor Browser**: `moz_icons` and `moz_pages_w_icons` tables
+    - **Safari**: `icon_info`, `page_url`, and `rejected_resources` tables
+5. **Extract**: Retrieves all URLs starting with "http" using browser-specific queries
+6. **Process**: Sorts and removes duplicate URLs from all browsers
+7. **Export**: Saves results to `buster_TIMESTAMP.txt`
 
 ## Requirements
 
-- macOS (tested on macOS 10.13+)
-- Bash 3.2+ (default macOS bash)
-- SQLite3 (pre-installed on macOS)
-- Standard Unix utilities: `find`, `file`, `grep`, `sort`
+### macOS
+- macOS 10.13 or later
+- Bash 3.2+ (pre-installed)
+- SQLite3 (pre-installed)
+- Standard Unix utilities
+
+### Linux
+- Any modern Linux distribution
+- Bash 3.2+
+- SQLite3
+- Standard Unix utilities
+
+#### Installing SQLite3 on Linux
+
+**Debian/Ubuntu:**
+```bash
+sudo apt install sqlite3
+```
+
+**Fedora/RHEL:**
+```bash
+sudo dnf install sqlite
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S sqlite
+```
 
 ## Installation
 
-1. Download or clone the script:
+1. Download the script:
+
+**Option A: Download directly**
+```bash
+# Using wget
+wget https://raw.githubusercontent.com/akgunumit/FaviconBuster/main/favicon_buster.sh
+
+# Or using curl
+curl -O https://raw.githubusercontent.com/akgunumit/FaviconBuster/main/favicon_buster.sh
+```
+
+**Option B: Clone the repository**
 ```bash
 git clone https://github.com/akgunumit/FaviconBuster.git
 cd FaviconBuster
 ```
 
-2. Make the script executable:
+2. Make it executable:
 ```bash
-chmod +x run.sh
+chmod +x favicon_buster.sh
+```
+
+3. Run the script:
+```bash
+./favicon_buster.sh
 ```
 
 ## Usage
 
-Run the script:
-```bash
-./run.sh
-```
+Simply run the script - it will automatically detect your OS and search the appropriate directories:
 
-The script will:
-- Display progress messages for each step
-- Show validation results for each database found
-- Create an output file named `buster_YYYYMMDD_HHMMSS.txt`
+```bash
+./favicon_buster.sh
+```
 
 ### Example Output
 
+**On macOS:**
 ```
-🔍 Searching for Favicons files in Application Support...
+🔍 FaviconBuster - Universal Edition
+====================================
 
-📄 Found: /Users/username/Library/Application Support/Google/Chrome/Default/Favicons
+🖥️  Detected OS: Darwin
+
+📱 Running in macOS mode...
+
+🔍 Searching for browser favicon databases...
+
+📊 Found 4 favicon database(s)
+
+🔎 Validating SQLite3 databases...
+
+📄 Checking: /Users/admin/Library/Application Support/Google/Chrome/Default/Favicons
+   ✅ Valid SQLite3 file
+
+📄 Checking: /Users/admin/Library/Application Support/Firefox/Profiles/abc123.default/favicons.sqlite
+   ✅ Valid SQLite3 file
+
+📄 Checking: /Users/admin/Library/Safari/Favicon Cache/favicons.db
    ✅ Valid SQLite3 file
 
 ═══════════════════════════════════════════════════════════
-📊 First Pass Summary:
-   Total files found: 3
-   SQLite3 files: 2
+📊 Validation Summary:
+   Total files found: 4
+   Valid SQLite3 files: 3
 ═══════════════════════════════════════════════════════════
 
-🔎 Validating database schemas...
+🔍 Checking database schemas and detecting browser types...
 
-🗄️  Checking: /Users/username/Library/Application Support/Google/Chrome/Default/Favicons
-   ✅ Found 'favicons' table with 'url' column
-   ✅ Found 'icon_mapping' table with 'page_url' column
-   ✨ Database structure validated!
+📋 Analyzing: /Users/admin/Library/Application Support/Google/Chrome/Default/Favicons
+   ✅ Chromium database (favicons.url + icon_mapping.page_url)
+
+📋 Analyzing: /Users/admin/Library/Application Support/Firefox/Profiles/abc123.default/favicons.sqlite
+   ✅ Firefox database (moz_icons.icon_url + moz_pages_w_icons.page_url)
+
+📋 Analyzing: /Users/admin/Library/Safari/Favicon Cache/favicons.db
+   ✅ Safari database (icon_info.url + page_url.url + rejected_resources)
 
 ═══════════════════════════════════════════════════════════
-📊 Final Summary:
-   Total files found: 3
-   SQLite3 files: 2
-   Valid databases: 1
+📊 Schema Check Summary:
+   Chromium databases: 1
+   Firefox databases: 1
+   Safari databases: 1
+   Total valid: 3
 ═══════════════════════════════════════════════════════════
 
 🔗 Extracting URLs from databases...
 
-📥 Extracting from: /Users/username/Library/Application Support/Google/Chrome/Default/Favicons
-   Found 1523 URLs in favicons table
-   Found 2847 URLs in icon_mapping table
+🔵 Processing Chromium databases...
 
-🔄 Sorting and removing duplicates...
+📥 Extracting from: /Users/admin/Library/Application Support/Google/Chrome/Default/Favicons
+   Found 847 URLs in favicons table
+   Found 1203 URLs in icon_mapping table
+
+🦊 Processing Firefox databases...
+
+📥 Extracting from: /Users/admin/Library/Application Support/Firefox/Profiles/abc123.default/favicons.sqlite
+   Found 432 URLs in moz_icons table
+   Found 658 URLs in moz_pages_w_icons table
+
+🧭 Processing Safari databases...
+
+📥 Extracting from: /Users/admin/Library/Safari/Favicon Cache/favicons.db
+   Found 324 URLs in icon_info table
+   Found 512 URLs in page_url table
+   Found 89 URLs in rejected_resources.page_url
+   Found 45 URLs in rejected_resources.icon_url
+
 ✅ Processing complete!
-   Total unique URLs collected: 3142
+   Total unique URLs collected: 2834
 
 💾 Saving URLs to file...
-✅ Saved 3142 unique URLs to: buster_20241118_143022.txt
+✅ Saved 2834 unique URLs to: buster_20241118_143022.txt
+
+🎉 Done!
 ```
 
-## Output Format
-
-The output file contains one URL per line:
+**On Linux:**
 ```
-http://example.com
-http://github.com
-https://www.google.com
-https://stackoverflow.com
+🔍 FaviconBuster - Universal Edition
+====================================
+
+🖥️  Detected OS: Linux
+
+🐧 Running in Linux mode...
+
+🔍 Searching for Favicons files in browser directories...
+
+📊 Found 3 Favicons file(s)
+
+🔎 Validating SQLite3 databases...
+...
+✅ Saved 1823 unique URLs to: buster_20241118_143022.txt
+
+🎉 Done!
+```
+
+## Search Locations
+
+The script recursively searches the following parent directories for favicon databases:
+
+### macOS
+- `~/Library/Application Support/` (Chromium browsers, Firefox, and Tor Browser)
+- `~/Library/Safari/Favicon Cache/` (Safari)
+    - Finds databases from: Chrome, Chromium, Brave, Edge, Vivaldi, Opera, Firefox, Tor Browser, Safari, and other browsers
+
+### Linux
+- `~/.config/` (standard installations)
+- `~/.cache/` (cached browser data)
+- `~/.var/app/` (Flatpak installations)
+- `~/snap/` (Snap installations)
+- `~/.mozilla/` (Firefox profiles and Tor Browser)
+- `~/.local/share/` (Tor Browser data)
+
+### Database Files Detected:
+- **Chromium browsers**: Files named "Favicons"
+- **Firefox/Tor Browser**: Files named "favicons.sqlite"
+- **Safari**: Files named "favicons.db" (macOS only)
+
+**Note about Tor Browser:** Tor Browser uses the same Firefox database schema (`favicons.sqlite` with `moz_icons` and `moz_pages_w_icons` tables), so it's automatically detected and processed as a Firefox-based browser.
+
+This approach automatically discovers favicon databases from any supported browser installed in these locations.
+
+## Output File Format
+
+The output file (`buster_TIMESTAMP.txt`) contains one URL per line, sorted alphabetically with duplicates removed:
+
+```
+https://example.com/
+https://github.com/
+https://www.google.com/
 ...
 ```
 
-## Browsers Supported
-
-This script works with any browser that stores favicons in SQLite format with the standard schema, including:
-- Google Chrome
-- Chromium
-- Microsoft Edge
-- Brave
-- Opera
-- Vivaldi
-
 ## Troubleshooting
 
-### No files found
-If the script finds no files, browsers might store their data in different locations. Common alternatives:
-- `~/Library/Application Support/BraveSoftware/Brave-Browser/`
-- `~/Library/Application Support/Microsoft Edge/`
+### No favicon databases found
+- Ensure you have supported browsers installed (Chrome, Brave, Edge, Firefox, Tor Browser, Safari)
+- Check if your browser uses a non-standard data directory
+- Verify the browser has been used to visit websites (databases are empty on fresh install)
+- For Firefox/Tor Browser, ensure you have at least one profile with browsing history
+- For Safari (macOS), ensure Safari has been used to browse websites
 
 ### Database locked error
-Close your browser before running the script, as databases may be locked while the browser is running.
+Close your browsers before running the script:
+
+**macOS:**
+```bash
+pkill "Google Chrome"
+pkill Chromium
+pkill "Brave Browser"
+pkill Firefox
+pkill "Tor Browser"
+pkill Safari
+```
+
+**Linux:**
+```bash
+pkill chrome
+pkill chromium
+pkill brave
+pkill firefox
+pkill tor
+```
 
 ### Permission denied
-Ensure you have read access to the Application Support directory:
+Ensure you have read access to the browser directories:
+
+**macOS:**
 ```bash
 ls -la ~/Library/Application\ Support/
 ```
 
-## Cybersecurity Significance
+**Linux:**
+```bash
+ls -la ~/.config/
+```
 
-### Why Favicons Are Important for Security Research
+### Unsupported OS
+If you see "Unsupported operating system", you're running on a system other than macOS or Linux (e.g., Windows, BSD). This script currently only supports macOS and Linux.
 
-Favicon databases are particularly valuable in cybersecurity and digital forensics for several critical reasons:
+For **Windows users**: Consider using WSL (Windows Subsystem for Linux) to run this script.
 
-#### 1. **Persistence and Retention**
-Favicon caches are stored in separate local databases and exhibit unique characteristics that make them particularly persistent - they are not affected by users clearing their browser data, survive system reboots, and even persist across incognito/private browsing sessions. Unlike regular browser history:
+### Missing SQLite3 (Linux)
+Install SQLite3 using your package manager (see Requirements section).
 
-- **Not cleared with regular cache**: Standard "Clear browsing data" operations often leave favicon databases intact
-- **Survives private browsing**: Favicons are fetched even in private browsing modes, making them ideal for persistent tracking
-- **Separate storage**: Stored in dedicated SQLite databases (F-Cache) independent of browsing history
-- **Long retention**: May retain URLs that have been purged or deleted from the History database
-
-#### 2. **Forensic Value**
-Favicon databases are indispensable for investigators as they can help reconstruct user activities, trace behaviors, and establish timelines:
-
-- **Recovers deleted history**: In some instances, favicon databases retain URLs that have been purged or deleted from the History database
-- **Timeline reconstruction**: Contains timestamps and visit patterns
-- **Cross-browser analysis**: Similar structure across Chromium-based browsers (Chrome, Edge, Brave, Opera, Vivaldi)
-- **Unallocated space recovery**: Fragments of purged or deleted data may remain in the unallocated space of SQLite database pages
-- **URL parameters included**: Favicon databases store complete URLs including parameters, which can reveal:
-    - Search queries (e.g., `google.com/search?q=sensitive+search+term`)
-    - Session tokens and tracking IDs
-    - User identifiers and account information
-    - Form data passed via GET requests
-    - API keys or authentication tokens in URLs
-    - Personal information in query strings
-
-#### 3. **Inspiration: The Supercookie Project**
-
-This project was inspired by the [supercookie](https://github.com/jonasstrehle/supercookie) project by Jonas Strehle, which demonstrates how favicon caches can be exploited for persistent tracking. His research, based on work by the University of Illinois at Chicago, revealed the security implications of favicon persistence and highlighted why these databases are valuable for both security research and privacy auditing.
-
-#### 4. **Use Cases in Security**
-
-- **Incident Response**: Trace malicious website visits and phishing attempts
-- **Threat Intelligence**: Identify patterns of suspicious browsing behavior
-- **Privacy Auditing**: Assess tracking exposure and data collection
-- **Legal Investigations**: Recover browsing history for evidence
-- **Security Research**: Analyze browser behavior and privacy vulnerabilities
-
-## Privacy Note
-
-This script reads local browser databases. The extracted URLs represent websites you've visited and can reveal detailed browsing patterns.
+## Privacy & Security Notes
 
 **Important considerations:**
-- Favicon data persists longer than regular browsing history
-- May contain URLs from incognito/private browsing sessions
-- Can reveal sites visited even after "clearing" browser data
-- Handle output files securely and delete them when no longer needed
-- Be aware that this data can be used for tracking and fingerprinting
 
-**Defensive measures:**
-- Regularly clear favicon caches manually (browser-specific procedures)
-- Use privacy-focused browsers with enhanced tracking protection
-- Consider disabling favicon caching if your browser supports it
-- Be aware that standard privacy tools may not protect against favicon-based tracking
+### Sensitive Data in URLs
+Favicon databases store complete URLs including query parameters, which can reveal:
+- Search queries (e.g., `?q=sensitive+search`)
+- Session tokens and tracking IDs
+- User identifiers
+- Form data passed via GET requests
+- API keys in URLs
+- Personal information in query strings
+- OAuth tokens and authentication data
+
+### Data Persistence
+Favicon caches can survive:
+- Regular browser cache clearing
+- Private/Incognito mode (in some cases)
+- Cookie deletion
+- Browser restarts
+
+## Use Cases
+
+- **Security Research**: Understanding browser data persistence mechanisms
+- **Digital Forensics**: Recovering browsing history from favicon databases
+- **Privacy Auditing**: Checking what data persists after cache clearing
+- **Data Recovery**: Retrieving lost browsing history
+
+## Technical Details
+
+### OS Detection
+The script uses `uname -s` to detect the operating system:
+- Returns `Darwin` for macOS
+- Returns `Linux` for Linux systems
+
+### Database Structure
+The script expects the following database schemas:
+
+**Chromium browsers:**
+```sql
+-- favicons table
+CREATE TABLE favicons (
+    id INTEGER PRIMARY KEY,
+    url LONGVARCHAR NOT NULL,
+    ...
+);
+
+-- icon_mapping table
+CREATE TABLE icon_mapping (
+    id INTEGER PRIMARY KEY,
+    page_url LONGVARCHAR NOT NULL,
+    ...
+);
+```
+
+**Firefox/Tor Browser:**
+```sql
+-- moz_icons table
+CREATE TABLE moz_icons (
+    id INTEGER PRIMARY KEY,
+    icon_url TEXT,
+    ...
+);
+
+-- moz_pages_w_icons table
+CREATE TABLE moz_pages_w_icons (
+    id INTEGER PRIMARY KEY,
+    page_url TEXT,
+    ...
+);
+```
+*Note: Tor Browser uses the same database schema as Firefox.*
+
+**Safari (macOS only):**
+```sql
+-- icon_info table
+CREATE TABLE icon_info (
+    uuid TEXT PRIMARY KEY,
+    url TEXT,
+    ...
+);
+
+-- page_url table
+CREATE TABLE page_url (
+    id INTEGER PRIMARY KEY,
+    url TEXT,
+    ...
+);
+
+-- rejected_resources table
+CREATE TABLE rejected_resources (
+    id INTEGER PRIMARY KEY,
+    page_url TEXT,
+    icon_url TEXT,
+    ...
+);
+```
+
+### Compatibility
+- Compatible with older bash versions found on macOS
+- Uses temporary files for deduplication to avoid memory issues with large datasets
+
+## Inspired By
+
+This tool was inspired by the [supercookie](https://github.com/jonasstrehle/supercookie) project, which demonstrates how favicons can be used for persistent tracking.
 
 ## License
 
@@ -198,4 +431,19 @@ MIT License - Feel free to use and modify as needed.
 
 ## Contributing
 
-Issues and pull requests are welcome!
+Issues and pull requests are welcome at [github.com/akgunumit/FaviconBuster](https://github.com/akgunumit/FaviconBuster)! Please ensure cross-platform compatibility when contributing.
+
+## Disclaimer
+
+This tool is for educational, research, and legitimate security purposes only. Always:
+- Respect privacy laws and regulations
+- Obtain proper authorization before analyzing systems you don't own
+- Use responsibly and ethically
+- Handle extracted data securely
+
+## Support
+
+For issues, questions, or contributions:
+- Open an issue on [GitHub](https://github.com/akgunumit/FaviconBuster/issues)
+- Submit a pull request on [GitHub](https://github.com/akgunumit/FaviconBuster/pulls)
+- Check [existing issues](https://github.com/akgunumit/FaviconBuster/issues) for solutions
