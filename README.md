@@ -297,6 +297,7 @@ sudo pacman -S sqlite
 
 This tool was inspired by the [supercookie](https://github.com/jonasstrehle/supercookie) project, which demonstrates how favicons can be used for persistent tracking.
 
+"Tales of Favicons and Caches: Persistent Tracking in Modern Browsers" paper by Scientists at University of Illinois, Chicago: [par.nsf.gov](https://par.nsf.gov/servlets/purl/10268961) 
 ## License
 
 MIT License - Feel free to use and modify as needed.
