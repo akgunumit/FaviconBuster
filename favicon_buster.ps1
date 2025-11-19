@@ -1,329 +1,265 @@
-# FaviconBuster - Cross-Platform Edition
-
-[![GitHub](https://img.shields.io/badge/GitHub-akgunumit%2FFaviconBuster-blue?logo=github)](https://github.com/akgunumit/FaviconBuster)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)]()
-[![License](https://img.shields.io/badge/license-MIT-green)]()
-
-A cross-platform tool to extract and collect all URLs from browser Favicons SQLite databases.
-
-## Overview
-
-FaviconBuster automatically detects your operating system, searches for browser favicon databases in the appropriate directories, validates their structure, and extracts all unique URLs.
-
-The tool supports **Chromium-based browsers** (Chrome, Brave, Edge, etc.), **Firefox-based browsers** (Firefox, Tor Browser), and **Safari** (macOS only), automatically detecting the browser type and using the appropriate database schema.
-
-This is useful for:
-- Security auditing of browsing history
-- Data recovery and analysis
-- Privacy assessment
-- Digital forensics
-
-## Supported Platforms
-
-- ✅ **macOS** (10.13+)
-- ✅ **Linux** (Ubuntu, Debian, Fedora, Arch, and most distributions)
-- ✅ **Windows** (10/11, Server 2016+)
-
-## Supported Browsers
-
-### Chromium-based browsers:
-- Google Chrome
-- Chromium
-- Brave Browser
-- Microsoft Edge
-- Vivaldi
-- Opera
-- Any other Chromium-based browsers
-
-### Firefox-based browsers:
-- Mozilla Firefox (all profiles)
-- Tor Browser
-
-### Safari:
-- Safari (macOS only)
-
-The script automatically detects the browser type based on database schema and uses the appropriate extraction method.
-
-## Quick Start
-
-### macOS / Linux
-
-```bash
-# Download the script
-wget https://raw.githubusercontent.com/akgunumit/FaviconBuster/main/favicon_buster.sh
-
-# Make it executable
-chmod +x favicon_buster.sh
-
-# Run it
-./favicon_buster.sh
-```
-
-### Windows
-
-```powershell
-# Download the script
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/akgunumit/FaviconBuster/main/favicon_buster.ps1" -OutFile "favicon_buster.ps1"
-
-# Download sqlite3.exe from https://www.sqlite.org/download.html
-# Place sqlite3.exe in the same directory as the script
-
-# Run it
-.\favicon_buster.ps1
-```
-
-## Requirements
-
-### macOS
-- Bash 3.2+ (pre-installed)
-- SQLite3 (pre-installed)
-
-### Linux
-- Bash 3.2+
-- SQLite3 (install if needed: `sudo apt install sqlite3`)
-
-### Windows
-- PowerShell 5.1+ (pre-installed on Windows 10/11)
-- **sqlite3.exe** - [Download from sqlite.org](https://www.sqlite.org/download.html)
-
-## Installation
-
-### Option 1: Download Scripts Directly
-
-**macOS / Linux:**
-```bash
-wget https://raw.githubusercontent.com/akgunumit/FaviconBuster/main/favicon_buster.sh
-chmod +x favicon_buster.sh
-```
-
-**Windows:**
-```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/akgunumit/FaviconBuster/main/favicon_buster.ps1" -OutFile "favicon_buster.ps1"
-```
-
-### Option 2: Clone Repository
-
-```bash
-git clone https://github.com/akgunumit/FaviconBuster.git
-cd FaviconBuster
-```
-
-**Then run:**
-- **macOS/Linux**: `./favicon_buster.sh`
-- **Windows**: `.\favicon_buster.ps1`
-
-## Usage
-
-### macOS / Linux
-
-```bash
-# Simply run the script
-./favicon_buster.sh
-```
-
-The script will:
-1. Auto-detect your OS (macOS or Linux)
-2. Search for favicon databases recursively
-3. Validate and identify browser types
-4. Extract URLs from all supported browsers
-5. Save results to `buster_TIMESTAMP.txt`
-
-### Windows
-
-**First time only:** Allow script execution
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
-**Run the script:**
-```powershell
-.\favicon_buster.ps1
-```
-
-Or right-click `favicon_buster.ps1` and select **"Run with PowerShell"**
-
-### Windows: Getting sqlite3.exe
-
-1. Go to https://www.sqlite.org/download.html
-2. Download "Precompiled Binaries for Windows"
-3. Look for: `sqlite-tools-win-x64-XXXXXXX.zip`
-4. Extract `sqlite3.exe` to the same directory as the script
-
-## Search Locations
-
-The tool recursively searches parent directories for favicon databases:
-
-### macOS
-- `~/Library/Application Support/` - Chromium browsers, Firefox, Tor Browser
-- `~/Library/Safari/` - Safari
-
-### Linux
-- `~/.config/` - Standard installations
-- `~/.cache/` - Cached browser data
-- `~/.var/app/` - Flatpak installations
-- `~/snap/` - Snap installations
-- `~/.mozilla/` - Firefox profiles
-- `~/.local/share/` - Tor Browser data
-
-### Windows
-- `%LOCALAPPDATA%` - Chrome, Edge, Brave, Vivaldi, Chromium
-- `%APPDATA%` - Firefox, Opera
-- `%USERPROFILE%\Desktop` - Tor Browser portable
-
-### Database Files Detected:
-- **Chromium browsers**: Files named "Favicons"
-- **Firefox/Tor Browser**: Files named "favicons.sqlite"
-- **Safari** (macOS): Files named "favicons.db"
-
-This approach automatically discovers favicon databases from any supported browser installed in these locations.
-
-## Output File Format
-
-The output file (`buster_TIMESTAMP.txt`) contains one URL per line, sorted alphabetically with duplicates removed:
-
-```
-https://example.com/
-https://github.com/
-https://www.google.com/
-...
-```
-
-## Platform-Specific Notes
-
-### macOS / Linux
-- Uses Bash shell script
-- Native SQLite3 support
-- No additional dependencies
-
-### Windows
-- Uses PowerShell script
-- Requires `sqlite3.exe` download
-- May need execution policy change on first run
-
-### Safari (macOS only)
-Safari favicon databases have a unique schema with additional tables:
-- `icon_info` table
-- `page_url` table
-- `rejected_resources` table (contains both `page_url` and `icon_url`)
-
-## Privacy & Security Notes
-
-**Important considerations:**
-
-### Sensitive Data in URLs
-Favicon databases store complete URLs including query parameters, which can reveal:
-- Search queries (e.g., `?q=sensitive+search`)
-- Session tokens and tracking IDs
-- User identifiers
-- Form data passed via GET requests
-- API keys in URLs
-- Personal information in query strings
-- OAuth tokens and authentication data
-
-### Data Persistence
-Favicon caches can survive:
-- Regular browser cache clearing
-- Private/Incognito mode (in some cases)
-- Cookie deletion
-- Browser restarts
-
-## Use Cases
-
-- **Security Research**: Understanding browser data persistence mechanisms
-- **Digital Forensics**: Recovering browsing history from favicon databases
-- **Privacy Auditing**: Checking what data persists after cache clearing
-- **Data Recovery**: Retrieving lost browsing history
-
-## Common Issues
-
-### Database locked error
-Close your browsers before running the script.
-
-**macOS:**
-```bash
-pkill "Google Chrome"
-pkill Chromium
-pkill "Brave Browser"
-pkill Firefox
-pkill "Tor Browser"
-pkill Safari
-```
-
-**Linux:**
-```bash
-pkill chrome
-pkill chromium
-pkill brave
-pkill firefox
-pkill tor
-```
-
-**Windows:**
-```powershell
-Stop-Process -Name chrome -ErrorAction SilentlyContinue
-Stop-Process -Name msedge -ErrorAction SilentlyContinue
-Stop-Process -Name firefox -ErrorAction SilentlyContinue
-Stop-Process -Name brave -ErrorAction SilentlyContinue
-```
-
-### Windows: sqlite3.exe not found
-
-Download SQLite from https://www.sqlite.org/download.html and place `sqlite3.exe` in the script directory.
-
-### Windows: Script execution disabled
-
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
-### Linux: Missing SQLite3
-
-**Debian/Ubuntu:**
-```bash
-sudo apt install sqlite3
-```
-
-**Fedora/RHEL:**
-```bash
-sudo dnf install sqlite
-```
-
-**Arch Linux:**
-```bash
-sudo pacman -S sqlite
-```
-
-## Inspired By
-
-This tool was inspired by the [supercookie](https://github.com/jonasstrehle/supercookie) project, which demonstrates how favicons can be used for persistent tracking.
-
-## License
-
-MIT License - Feel free to use and modify as needed.
-
-## Contributing
-
-Issues and pull requests are welcome at [github.com/akgunumit/FaviconBuster](https://github.com/akgunumit/FaviconBuster)! Please ensure cross-platform compatibility when contributing.
-
-## Disclaimer
-
-This tool is for educational, research, and legitimate security purposes only. Always:
-- Respect privacy laws and regulations
-- Obtain proper authorization before analyzing systems you don't own
-- Use responsibly and ethically
-- Handle extracted data securely
-
-## Support
-
-For issues, questions, or contributions:
-- Open an issue on [GitHub](https://github.com/akgunumit/FaviconBuster/issues)
-- Submit a pull request on [GitHub](https://github.com/akgunumit/FaviconBuster/pulls)
-- Check [existing issues](https://github.com/akgunumit/FaviconBuster/issues) for solutions
-
-## Files in Repository
-
-- `favicon_buster.sh` - Bash script for macOS and Linux
-- `favicon_buster.ps1` - PowerShell script for Windows
-- `README.md` - This file
-- `README_WINDOWS.md` - Detailed Windows documentation
-- `QUICKSTART_WINDOWS.md` - Windows quick start guide
+# FaviconBuster - Windows Edition
+# PowerShell script to extract URLs from browser favicon databases
+
+Write-Host "FaviconBuster - Windows Edition"
+Write-Host "==============================="
+Write-Host ""
+
+# Check if sqlite3.exe is available
+$sqlite3Path = $null
+
+# Check in current directory
+if (Test-Path ".\sqlite3.exe") {
+    $sqlite3Path = ".\sqlite3.exe"
+}
+# Check in PATH
+elseif (Get-Command sqlite3.exe -ErrorAction SilentlyContinue) {
+    $sqlite3Path = "sqlite3.exe"
+}
+else {
+    Write-Host "[ERROR] sqlite3.exe not found!"
+    Write-Host ""
+    Write-Host "Please download sqlite3.exe from https://www.sqlite.org/download.html"
+    Write-Host "Place it in the same directory as this script or add it to your PATH."
+    Write-Host ""
+    Write-Host "Windows downloads are in the 'Precompiled Binaries for Windows' section."
+    exit 1
+}
+
+Write-Host "Using SQLite: $sqlite3Path"
+Write-Host ""
+
+# Define search paths for Windows browsers (parent directories)
+$searchPaths = @(
+    "$env:LOCALAPPDATA",
+    "$env:APPDATA",
+    "$env:USERPROFILE\Desktop"
+)
+
+Write-Host "Searching for browser favicon databases..."
+Write-Host ""
+
+$sqliteFiles = @()
+
+# Search for Chromium databases (named "Favicons")
+foreach ($searchPath in $searchPaths) {
+    if (Test-Path $searchPath) {
+        $files = Get-ChildItem -Path $searchPath -Filter "Favicons" -Recurse -ErrorAction SilentlyContinue -File
+        foreach ($file in $files) {
+            $sqliteFiles += $file.FullName
+        }
+    }
+}
+
+# Search for Firefox databases (named "favicons.sqlite")
+foreach ($searchPath in $searchPaths) {
+    if (Test-Path $searchPath) {
+        $files = Get-ChildItem -Path $searchPath -Filter "favicons.sqlite" -Recurse -ErrorAction SilentlyContinue -File
+        foreach ($file in $files) {
+            $sqliteFiles += $file.FullName
+        }
+    }
+}
+
+$totalFound = $sqliteFiles.Count
+Write-Host "Found $totalFound favicon database(s)"
+Write-Host ""
+
+if ($totalFound -eq 0) {
+    Write-Host "[WARNING] No favicon databases found. Make sure you have supported browsers installed:"
+    Write-Host "   - Chromium-based: Chrome, Brave, Edge, Vivaldi, Opera"
+    Write-Host "   - Firefox-based: Firefox, Tor Browser"
+    exit 0
+}
+
+# Validate SQLite files
+Write-Host "Validating SQLite3 databases..."
+Write-Host ""
+
+$validFiles = @()
+
+foreach ($file in $sqliteFiles) {
+    Write-Host "Checking: $file"
+
+    # Try to open the database and check if it's valid SQLite
+    try {
+        $testQuery = "SELECT name FROM sqlite_master LIMIT 1;"
+        $result = & $sqlite3Path $file $testQuery 2>&1
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "   [OK] Valid SQLite3 file"
+            $validFiles += $file
+        }
+        else {
+            Write-Host "   [SKIP] Not a valid SQLite3 file"
+        }
+    }
+    catch {
+        Write-Host "   [SKIP] Not a valid SQLite3 file"
+    }
+    Write-Host ""
+}
+
+Write-Host "============================================================="
+Write-Host "Validation Summary:"
+Write-Host "   Total files found: $totalFound"
+Write-Host "   Valid SQLite3 files: $($validFiles.Count)"
+Write-Host "============================================================="
+Write-Host ""
+
+if ($validFiles.Count -eq 0) {
+    Write-Host "[WARNING] No valid SQLite3 favicon databases found."
+    exit 0
+}
+
+# Check database schema and categorize by browser type
+Write-Host "Checking database schemas and detecting browser types..."
+Write-Host ""
+
+$chromiumFiles = @()
+$firefoxFiles = @()
+
+foreach ($file in $validFiles) {
+    Write-Host "Analyzing: $file"
+
+    # Check for Chromium schema (favicons + icon_mapping tables)
+    $chromiumFavicons = & $sqlite3Path $file "SELECT name FROM sqlite_master WHERE type='table' AND name='favicons';" 2>$null
+    $chromiumIconMapping = & $sqlite3Path $file "SELECT name FROM sqlite_master WHERE type='table' AND name='icon_mapping';" 2>$null
+
+    # Check for Firefox schema (moz_icons + moz_pages_w_icons tables)
+    $firefoxIcons = & $sqlite3Path $file "SELECT name FROM sqlite_master WHERE type='table' AND name='moz_icons';" 2>$null
+    $firefoxPages = & $sqlite3Path $file "SELECT name FROM sqlite_master WHERE type='table' AND name='moz_pages_w_icons';" 2>$null
+
+    if ($chromiumFavicons -and $chromiumIconMapping) {
+        # Verify columns exist
+        $hasUrl = & $sqlite3Path $file "PRAGMA table_info(favicons);" 2>$null | Select-String -Pattern "url" -Quiet
+        $hasPageUrl = & $sqlite3Path $file "PRAGMA table_info(icon_mapping);" 2>$null | Select-String -Pattern "page_url" -Quiet
+
+        if ($hasUrl -and $hasPageUrl) {
+            Write-Host "   [OK] Chromium database (favicons.url + icon_mapping.page_url)"
+            $chromiumFiles += $file
+        }
+        else {
+            Write-Host "   [WARN] Chromium schema incomplete"
+        }
+    }
+    elseif ($firefoxIcons -and $firefoxPages) {
+        # Verify columns exist
+        $hasIconUrl = & $sqlite3Path $file "PRAGMA table_info(moz_icons);" 2>$null | Select-String -Pattern "icon_url" -Quiet
+        $hasPageUrlFF = & $sqlite3Path $file "PRAGMA table_info(moz_pages_w_icons);" 2>$null | Select-String -Pattern "page_url" -Quiet
+
+        if ($hasIconUrl -and $hasPageUrlFF) {
+            Write-Host "   [OK] Firefox database (moz_icons.icon_url + moz_pages_w_icons.page_url)"
+            $firefoxFiles += $file
+        }
+        else {
+            Write-Host "   [WARN] Firefox schema incomplete"
+        }
+    }
+    else {
+        Write-Host "   [WARN] Unknown or incomplete database schema"
+    }
+    Write-Host ""
+}
+
+$totalValid = $chromiumFiles.Count + $firefoxFiles.Count
+
+if ($totalValid -eq 0) {
+    Write-Host "[ERROR] No databases with valid schema found."
+    exit 1
+}
+
+Write-Host "============================================================="
+Write-Host "Schema Check Summary:"
+Write-Host "   Chromium databases: $($chromiumFiles.Count)"
+Write-Host "   Firefox databases: $($firefoxFiles.Count)"
+Write-Host "   Total valid: $totalValid"
+Write-Host "============================================================="
+Write-Host ""
+
+# Extract all URLs from valid databases
+Write-Host "Extracting URLs from databases..."
+Write-Host ""
+
+$allUrls = @()
+
+# Process Chromium databases
+if ($chromiumFiles.Count -gt 0) {
+    Write-Host "[CHROMIUM] Processing Chromium databases..."
+    Write-Host ""
+
+    foreach ($file in $chromiumFiles) {
+        Write-Host "Extracting from: $file"
+
+        # Extract URLs from favicons table (only those starting with "http")
+        $urls = & $sqlite3Path $file "SELECT url FROM favicons WHERE url LIKE 'http%';" 2>$null
+        $urlCount = 0
+        if ($urls) {
+            $urlCount = ($urls | Measure-Object).Count
+            $allUrls += $urls
+        }
+        Write-Host "   Found $urlCount URLs in favicons table"
+
+        # Extract page_urls from icon_mapping table (only those starting with "http")
+        $pageUrls = & $sqlite3Path $file "SELECT page_url FROM icon_mapping WHERE page_url LIKE 'http%';" 2>$null
+        $pageUrlCount = 0
+        if ($pageUrls) {
+            $pageUrlCount = ($pageUrls | Measure-Object).Count
+            $allUrls += $pageUrls
+        }
+        Write-Host "   Found $pageUrlCount URLs in icon_mapping table"
+        Write-Host ""
+    }
+}
+
+# Process Firefox databases
+if ($firefoxFiles.Count -gt 0) {
+    Write-Host "[FIREFOX] Processing Firefox databases..."
+    Write-Host ""
+
+    foreach ($file in $firefoxFiles) {
+        Write-Host "Extracting from: $file"
+
+        # Extract URLs from moz_icons table (only those starting with "http")
+        $iconUrls = & $sqlite3Path $file "SELECT icon_url FROM moz_icons WHERE icon_url LIKE 'http%';" 2>$null
+        $iconUrlCount = 0
+        if ($iconUrls) {
+            $iconUrlCount = ($iconUrls | Measure-Object).Count
+            $allUrls += $iconUrls
+        }
+        Write-Host "   Found $iconUrlCount URLs in moz_icons table"
+
+        # Extract page_urls from moz_pages_w_icons table (only those starting with "http")
+        $pageUrls = & $sqlite3Path $file "SELECT page_url FROM moz_pages_w_icons WHERE page_url LIKE 'http%';" 2>$null
+        $pageUrlCount = 0
+        if ($pageUrls) {
+            $pageUrlCount = ($pageUrls | Measure-Object).Count
+            $allUrls += $pageUrls
+        }
+        Write-Host "   Found $pageUrlCount URLs in moz_pages_w_icons table"
+        Write-Host ""
+    }
+}
+
+if ($allUrls.Count -eq 0) {
+    Write-Host "[WARNING] No URLs found in any database."
+    exit 0
+}
+
+# Sort and remove duplicates
+Write-Host "Sorting and removing duplicates..."
+$uniqueUrls = $allUrls | Where-Object { $_ -ne "" } | Sort-Object -Unique
+
+Write-Host "[OK] Processing complete!"
+Write-Host "   Total unique URLs collected: $($uniqueUrls.Count)"
+Write-Host ""
+
+# Save to file with timestamp
+$timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$outputFile = "buster_$timestamp.txt"
+
+Write-Host "Saving URLs to file..."
+$uniqueUrls | Out-File -FilePath $outputFile -Encoding UTF8
+Write-Host "[OK] Saved $($uniqueUrls.Count) unique URLs to: $outputFile"
+Write-Host ""
+Write-Host "Done!"
